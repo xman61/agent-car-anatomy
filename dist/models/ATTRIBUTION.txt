@@ -1,9 +1,10 @@
-Four-door sedan
-Model: Graphite four-door sedan, authored by Innerscene Corp.
-License: CC0 1.0 Universal (public domain dedication).
-https://creativecommons.org/publicdomain/zero/1.0/
-Source: https://www.innerscene.com/tools/library/3d-parts/graphite-four-door-sedan-eed96d12
-Changes: display scale, materials and exploded assembly grouping.
+BMW X5 2018 (G05)
+Creator: BMW Car IT GmbH / bmwcarit digital-car-3d contributors.
+License: Creative Commons Attribution 4.0 International (CC BY 4.0).
+https://creativecommons.org/licenses/by/4.0/
+Source: https://github.com/bmwcarit/digital-car-3d
+Changes: combined glTF components into a glTF scene with split binary buffers, recreated mirrored doors and wheel placements, adapted materials, normalized scale, and added exploded and isolated component views. BMW logo texture and hood emblem from the same repository.
+BMW trademarks remain their respective owners’ property.
 
 Engine extracted from Car Concept
 Model and textures: Eric Chadwick, Darmstadt Graphics Group GmbH, 2024.
@@ -21,4 +22,3 @@ Trademark information: https://github.com/KhronosGroup/glTF-Sample-Assets/blob/m
 
 Changes in this application: extracted the Engine node with its referenced geometry, textures and materials into engine.glb; normalized orientation and display size. The complete concept-car body is not included in this version. Added chassis and tank/fuel components for the teaching visualization.
 
-The sedan is an original unbranded visualization model. The engine is adapted from the separately credited Car Concept asset.

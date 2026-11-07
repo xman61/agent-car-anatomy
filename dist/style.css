@@ -14,3 +14,5 @@
 @media(max-width:1000px){.stage{min-height:680px}}
 @media(max-width:900px){.stage{height:610px;min-height:610px}#viewport{margin-top:28px}#labels{margin:0 12px 15px;gap:6px}#labels .part-label{padding:9px 10px;font-size:11px;gap:5px}}
 @media(max-width:480px){.stage{height:540px;min-height:540px}#labels{margin:0 9px 14px;gap:4px}#labels .part-label{font-size:10px;padding:9px 7px;gap:4px}}
+
+.stage-top{gap:12px}.model-tag{margin-right:auto}.focus-name{position:absolute;top:64px;left:26px;font-size:15px;font-weight:600;color:#38534a;z-index:4;pointer-events:none}.is-focused .explode-control{opacity:.55}.is-focused #viewport{margin-top:50px}#back-to-car{color:#315f4c;font-weight:600}button[hidden],.focus-name[hidden]{display:none!important}@media(max-width:480px){.stage-top{gap:7px}.model-tag{font-size:10px}.stage-top .plain-btn{font-size:11px}.focus-name{top:60px;left:18px}}

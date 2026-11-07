@@ -35,9 +35,11 @@ function selectPart(id, open = true) {
   $('#detach').innerHTML = `${state[id] ? (id === 'context' ? '移除汽油' : '拆下' + p.name) : (id === 'context' ? '补充汽油' : '装回' + p.name)} <span>${state[id] ? '↗' : '↙'}</span>`;
   $('#part-state').textContent = state[id] ? '已装配 · 可以参与任务' : '已移除 · 启动演示看看变化';
   $('#context-preview').textContent = contexts[state.contextMode];
-  if (open) setSpread(Math.max(state.spread, .76));
+  if (open) graphics?.focus(id);
+  else if(graphics?.focusedId && graphics.focusedId !== id) graphics.exitFocus();
 }
 function setSpread(value) {
+  graphics?.exitFocus();
   state.spread = value; $('#spread').value = Math.round(value * 100); $('#spread-value').value = `${Math.round(value * 100)}%`;
   $('#assemble').classList.toggle('active', value < .5); $('#explode').classList.toggle('active', value >= .5);
   $('#assemble').setAttribute('aria-pressed', value < .5); $('#explode').setAttribute('aria-pressed', value >= .5);
@@ -89,6 +91,8 @@ $('#pause').onclick = () => { if (state.playing) stopDemo(); else showStep(state
 $('#next').onclick = () => showStep(Math.min(4, state.step + 1), false);
 $$('[data-step]').forEach(b => b.onclick = () => showStep(+b.dataset.step, false));
 $('#reset').onclick = () => graphics?.reset();
+$('#back-to-car').onclick = () => graphics?.exitFocus();
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#about').open)graphics?.exitFocus();});
 $('#auto-rotate').onclick = () => { const on = $('#auto-rotate').getAttribute('aria-pressed') !== 'true'; $('#auto-rotate').setAttribute('aria-pressed', on); if (graphics) graphics.controls.autoRotate = on; };
 $('#reset-all').onclick = () => {
   stopDemo(); Object.assign(state, { engine: true, tools: true, context: true, contextMode: 'relevant', step: -1 });
