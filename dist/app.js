@@ -23,6 +23,7 @@ function stopDemo(message) {
 }
 function selectPart(id, open = true) {
   state.selected = id; const p = parts[id];
+  document.documentElement.dataset.selection = id;
   document.documentElement.style.setProperty('--accent', p.color);
   $('#part-title').textContent = p.title; $('#mapping').textContent = p.mapping;
   $('#part-symbol').textContent = p.symbol; $('#part-description').textContent = p.description;

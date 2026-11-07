@@ -45,6 +45,23 @@ export async function createCarScene({state,selectPart,setSpread,reduced}) {
   const labels=[['engine',engine,new THREE.Vector3(0,0,0)],['tools',frontWheel,new THREE.Vector3(0,0,0)],['context',fuel,new THREE.Vector3(0,0,0)]];
   const focusRoot=new THREE.Group();scene.add(focusRoot);
   const names={engine:'大模型',tools:'工具',context:'上下文'};
+  const selectionColors={engine:0xb7e83f,tools:0x37d5ee,context:0xffbc36};
+  let highlightedGroup=null,highlightedId=null,savedMaterials=[];
+  function highlightPart(id,g){
+    if(highlightedGroup===g&&highlightedId===id)return;
+    for(const [mesh,original,highlighted] of savedMaterials){mesh.material=original;highlighted.forEach(m=>m.dispose());}
+    savedMaterials=[];highlightedGroup=g;highlightedId=id;
+    g.traverse(mesh=>{if(!mesh.isMesh)return;const original=mesh.material;
+      const materials=(Array.isArray(original)?original:[original]).map(source=>{
+        const m=source.clone();m.color?.set(selectionColors[id]);m.map=null;
+        if(m.emissive){m.emissive.set(selectionColors[id]);m.emissiveMap=null;m.emissiveIntensity=.12;}
+        if('metalness' in m)m.metalness=Math.min(m.metalness,.28);
+        if('roughness' in m)m.roughness=Math.max(m.roughness,.34);
+        if('aoMapIntensity' in m)m.aoMapIntensity=.45;
+        m.needsUpdate=true;return m;
+      });mesh.material=Array.isArray(original)?materials:materials[0];savedMaterials.push([mesh,original,materials]);
+    });
+  }
   function fitFocus(){
     const half=THREE.MathUtils.degToRad(camera.fov/2),angle=Math.min(half,Math.atan(Math.tan(half)*camera.aspect));
     const distance=focusRadius/Math.sin(angle)*1.18;
@@ -54,7 +71,7 @@ export async function createCarScene({state,selectPart,setSpread,reduced}) {
   function focus(id,key){
     const g=key?moving.find(o=>o.g.name===key)?.g:labels.find(o=>o[0]===id)?.[1];if(!g)return;
     if(!focused)savedView={position:camera.position.clone(),target:controls.target.clone(),zoom:camera.zoom};
-    focusRoot.clear();const model=g.clone(true);model.position.set(0,0,0);model.visible=true;focusRoot.add(model);focusRoot.updateMatrixWorld(true);
+    focusRoot.clear();highlightPart(id,g);const model=g.clone(true);model.position.set(0,0,0);model.visible=true;focusRoot.add(model);focusRoot.updateMatrixWorld(true);
     const b=new THREE.Box3().setFromObject(model),center=b.getCenter(new THREE.Vector3());model.position.sub(center).add(new THREE.Vector3(0,1,0));focusRadius=b.getSize(new THREE.Vector3()).length()/2;
     focused={id,key:g.name};car.visible=false;floor.visible=grid.visible=false;fitFocus();
     viewport.dataset.focus=id;viewport.dataset.focusKey=g.name;$('#back-to-car').hidden=false;$('#focus-name').hidden=false;$('#focus-name').textContent=g.userData.partName+' · '+names[id];
@@ -74,6 +91,7 @@ export async function createCarScene({state,selectPart,setSpread,reduced}) {
   $('#loading').hidden=true;viewport.dataset.model='bmw-x5';
   const tmp=new THREE.Vector3(),fuelColor=new THREE.Color();
   function frame(t){requestAnimationFrame(frame);if(document.hidden)return;const dt=Math.min((t-last)/1000,.05);last=t;const a=reduced?1:1-Math.exp(-7*dt);
+    if(highlightedId!==state.selected)highlightPart(state.selected,labels.find(o=>o[0]===state.selected)[1]);
     for(const o of moving){const detached=o.id!=='body'&&!state[o.id],amount=detached?Math.max(state.spread,1.15):state.spread;tmp.copy(o.base).addScaledVector(o.delta,amount);if(detached)tmp.y+=.35;o.g.position.lerp(tmp,a);}
     fuel.visible=state.spread>.08||!state.context;
     fluid.scale.y=THREE.MathUtils.lerp(fluid.scale.y,!state.context?.02:state.contextMode==='brief'?.3:1,a);fluid.position.y=-.26+.24*fluid.scale.y;
