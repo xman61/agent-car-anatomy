@@ -222,7 +222,9 @@ function buildScene() {
       const y=Math.max(67,Math.min(viewport.clientHeight-30,(-p.y*.5+.5)*viewport.clientHeight));
       el.style.left=`${x}px`;el.style.top=`${y}px`;el.style.opacity=p.z<1?'1':'0';
     }
-    controls.update(); renderer.render(scene,camera);
+    camera.zoom = THREE.MathUtils.lerp(camera.zoom,1-state.spread*.15,lerp);
+    controls.target.y = THREE.MathUtils.lerp(controls.target.y,1.35+state.spread*.22,lerp);
+    camera.updateProjectionMatrix(); controls.update(); renderer.render(scene,camera);
   }
   requestAnimationFrame(frame);
   return { controls, reset };
