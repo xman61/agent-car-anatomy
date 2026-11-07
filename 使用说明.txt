@@ -1,7 +1,8 @@
 拆开一辆智能体 — BMW X5 部件放大讲解版
 
-在线入口：https://agent-car-lab-61.snowy-llama-6079.chatgpt.site
-网站默认私有，使用发布账号登录。在线发布状态另见交付回复。
+在线入口：https://xman61.github.io/agent-car-anatomy/
+GitHub Pages 公开演示，无需登录 ChatGPT 或 GitHub。
+公开源码：https://github.com/xman61/agent-car-anatomy
 
 核心对应：发动机=大模型；零部件=工具；汽油=上下文。
 操作：拖动旋转、滚轮/双指缩放；点击部件或标签查看解释；切换整车/拆解；滑杆调节展开程度。
