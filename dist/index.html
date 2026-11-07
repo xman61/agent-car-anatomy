@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#f4f4ef"><meta name="description" content="拆开一辆汽车，理解智能体的大模型、工具与上下文。">
-  <title>拆开一辆智能体 · 汽车互动实验室</title>
+  <title>智能体解剖台 · BMW X5</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23334d40'/%3E%3Ctext x='8' y='25' font-size='29' fill='white' font-family='Georgia' font-style='italic'%3Ea%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="./style.css">
   <script type="importmap">{"imports":{"three":"./three.module.js"}}</script>
 </head>
 <body>
-<header><a class="brand" href="./" aria-label="汽车智能体实验室首页"><span class="brand-icon">a<span>↗</span></span><span>智能体实验室<small>AGENT LAB / 01</small></span></a><div class="header-right"><button class="icon-btn" id="help" aria-label="模型署名">©</button><button class="icon-btn" id="fullscreen" aria-label="进入全屏">⛶</button></div></header>
+<header><a class="brand" href="./" aria-label="智能体解剖台首页"><span class="brand-icon">a<span>↗</span></span><span>智能体解剖台<small>AGENT ANATOMY</small></span></a><div class="header-right"><button class="icon-btn" id="help" aria-label="模型署名">©</button><button class="icon-btn" id="fullscreen" aria-label="进入全屏">⛶</button></div></header>
 <main>
-  <section class="intro"><div><p class="eyebrow">从一辆车，认识一个智能体</p><h1>拆开，看看它怎么工作<span>。</span></h1></div></section>
   <div class="workspace">
+<nav class="parts-nav" aria-label="汽车部件目录"><div class="parts-nav-heading"><h1>整车结构</h1><span>BMW X5</span></div><div class="parts-list"><button id="overview" class="nav-part active" aria-pressed="true"><span class="nav-icon">◇</span><span><b>整车总览</b><small>组装与拆解</small></span><span class="nav-arrow">›</span></button><button class="nav-part" data-part="engine" data-focus-key="engine" data-match="engine" aria-pressed="false"><span class="nav-icon">⚙</span><span><b>发动机</b><small>大模型</small></span><span class="nav-arrow">›</span></button><button class="nav-part" data-part="tools" data-focus-key="wheel_0" data-match="wheel" aria-pressed="false"><span class="nav-icon">◉</span><span><b>车轮</b><small>工具</small></span><span class="nav-arrow">›</span></button><button class="nav-part" data-part="tools" data-focus-key="door_F_0" data-match="door" aria-pressed="false"><span class="nav-icon">▱</span><span><b>车门</b><small>工具</small></span><span class="nav-arrow">›</span></button><button class="nav-part" data-part="tools" data-focus-key="hood" data-match="hood" aria-pressed="false"><span class="nav-icon">▰</span><span><b>引擎盖</b><small>工具</small></span><span class="nav-arrow">›</span></button><button class="nav-part" data-part="tools" data-focus-key="interior_SteeringWheel" data-match="interior_Steering" aria-pressed="false"><span class="nav-icon">⊕</span><span><b>方向盘</b><small>工具</small></span><span class="nav-arrow">›</span></button><button class="nav-part" data-part="tools" data-focus-key="chassis" data-match="chassis" aria-pressed="false"><span class="nav-icon">▤</span><span><b>底盘</b><small>工具</small></span><span class="nav-arrow">›</span></button><button class="nav-part" data-part="context" data-focus-key="context" data-match="context" aria-pressed="false"><span class="nav-icon">◕</span><span><b>油箱与汽油</b><small>上下文</small></span><span class="nav-arrow">›</span></button></div><div class="nav-legend"><span><i></i>大模型</span><span><i></i>工具</span><span><i></i>上下文</span></div></nav>
     <section class="stage" aria-label="可交互的三维汽车">
       <div class="stage-top"><span class="model-tag"><i></i> AGENT / BMW X5</span><button id="back-to-car" class="plain-btn" hidden>← 返回整车</button><button id="reset" class="plain-btn">↺ 重置视角</button></div>
       <div id="focus-name" class="focus-name" hidden></div><div id="viewport"><div id="loading">正在组装你的智能体…</div><div id="fallback" hidden><strong>当前浏览器无法显示 3D</strong><p>仍可使用右侧部件卡片与下方任务演示。</p></div></div>
@@ -22,9 +22,9 @@
       <div class="explode-control"><label for="spread">拆解程度</label><input id="spread" type="range" min="0" max="100" value="0"><output id="spread-value">0%</output></div>
     </section>
     <aside class="inspector">
-      <div class="inspector-heading"><span class="eyebrow">认识它的组成</span><span class="index-num" id="part-index">01 / 03</span></div>
-      <div class="part-tabs" role="tablist" aria-label="智能体组成"><button id="tab-engine" role="tab" data-select="engine" aria-selected="true" aria-controls="detail" tabindex="0">发动机</button><button id="tab-tools" role="tab" data-select="tools" aria-selected="false" aria-controls="detail" tabindex="-1">零部件</button><button id="tab-context" role="tab" data-select="context" aria-selected="false" aria-controls="detail" tabindex="-1">汽油</button></div>
-      <div id="detail" role="tabpanel" aria-labelledby="tab-engine" tabindex="0">
+      <div class="inspector-heading"><span class="eyebrow">部件讲解</span><span class="index-num" id="part-index">01 / 03</span></div>
+      <div hidden class="part-tabs" role="tablist" aria-label="智能体组成"><button id="tab-engine" role="tab" data-select="engine" aria-selected="true" aria-controls="detail" tabindex="0">发动机</button><button id="tab-tools" role="tab" data-select="tools" aria-selected="false" aria-controls="detail" tabindex="-1">零部件</button><button id="tab-context" role="tab" data-select="context" aria-selected="false" aria-controls="detail" tabindex="-1">汽油</button></div>
+      <div id="detail" role="region" aria-labelledby="part-title" tabindex="0">
         <div class="part-symbol" id="part-symbol">⚙</div><p class="mapping" id="mapping">发动机 → 思考与规划</p><h2 id="part-title">大模型</h2><p class="description" id="part-description"></p>
         <div class="example"><span>放进教学场景</span><p id="part-example"></p></div>
         <div id="context-options" hidden><span class="control-label">选择加入的上下文</span><div class="context-choice"><button data-context="brief">简略</button><button data-context="relevant" class="active">相关且充分</button><button data-context="noisy">夹杂无关内容</button></div><p class="context-preview" id="context-preview"></p></div>

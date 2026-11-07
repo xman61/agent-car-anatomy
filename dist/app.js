@@ -29,7 +29,7 @@ function selectPart(id, open = true) {
   $('#part-example').textContent = p.example;
   $('#part-index').textContent = `0${Object.keys(parts).indexOf(id) + 1} / 03`;
   $$('.part-tabs button').forEach(b => { const active = b.dataset.select === id; b.setAttribute('aria-selected', active); b.tabIndex = active ? 0 : -1; });
-  $('#detail').setAttribute('aria-labelledby', `tab-${id}`);
+  $('#detail').setAttribute('aria-labelledby', 'part-title');
   $$('.part-label').forEach(b => b.classList.toggle('selected', b.dataset.select === id));
   $('#context-options').hidden = id !== 'context';
   $('#detach').innerHTML = `${state[id] ? (id === 'context' ? '移除汽油' : '拆下' + p.name) : (id === 'context' ? '补充汽油' : '装回' + p.name)} <span>${state[id] ? '↗' : '↙'}</span>`;
@@ -91,6 +91,8 @@ $('#pause').onclick = () => { if (state.playing) stopDemo(); else showStep(state
 $('#next').onclick = () => showStep(Math.min(4, state.step + 1), false);
 $$('[data-step]').forEach(b => b.onclick = () => showStep(+b.dataset.step, false));
 $('#reset').onclick = () => graphics?.reset();
+$$('.nav-part[data-part]').forEach(b=>b.onclick=()=>{selectPart(b.dataset.part,false);graphics?.focus(b.dataset.part,b.dataset.focusKey);});
+$('#overview').onclick=()=>{graphics?.exitFocus();graphics?.reset();};
 $('#back-to-car').onclick = () => graphics?.exitFocus();
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#about').open)graphics?.exitFocus();});
 $('#auto-rotate').onclick = () => { const on = $('#auto-rotate').getAttribute('aria-pressed') !== 'true'; $('#auto-rotate').setAttribute('aria-pressed', on); if (graphics) graphics.controls.autoRotate = on; };

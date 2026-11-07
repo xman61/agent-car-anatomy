@@ -59,10 +59,12 @@ export async function createCarScene({state,selectPart,setSpread,reduced}) {
     focused={id,key:g.name};car.visible=false;floor.visible=grid.visible=false;fitFocus();
     viewport.dataset.focus=id;viewport.dataset.focusKey=g.name;$('#back-to-car').hidden=false;$('#focus-name').hidden=false;$('#focus-name').textContent=g.userData.partName+' · '+names[id];
     $('.stage').classList.add('is-focused');
+    document.querySelectorAll('.nav-part').forEach(b=>{const active=!!b.dataset.match&&g.name.startsWith(b.dataset.match);b.classList.toggle('active',active);b.setAttribute('aria-pressed',active);});
   }
   function exitFocus(){if(!focused)return;focused=null;focusRoot.clear();car.visible=true;floor.visible=grid.visible=true;
     camera.position.copy(savedView.position);controls.target.copy(savedView.target);camera.zoom=savedView.zoom;controls.minDistance=7;controls.maxDistance=23;camera.updateProjectionMatrix();controls.update();
     delete viewport.dataset.focus;delete viewport.dataset.focusKey;$('#back-to-car').hidden=true;$('#focus-name').hidden=true;$('.stage').classList.remove('is-focused');
+    document.querySelectorAll('.nav-part').forEach(b=>{const active=b.id==='overview';b.classList.toggle('active',active);b.setAttribute('aria-pressed',active);});
   }
   let priorAspect=camera.aspect;
   const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();let start,last=0;
