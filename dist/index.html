@@ -9,9 +9,9 @@
   <script type="importmap">{"imports":{"three":"./three.module.js"}}</script>
 </head>
 <body>
-<header><a class="brand" href="./" aria-label="汽车智能体实验室首页"><span class="brand-icon">a<span>↗</span></span><span>智能体实验室<small>AGENT LAB / 01</small></span></a><div class="header-right"><span class="status-dot"></span><span>交互教学演示</span><button class="icon-btn" id="help" aria-label="查看类比说明">?</button><button class="icon-btn" id="fullscreen" aria-label="进入全屏">⛶</button></div></header>
+<header><a class="brand" href="./" aria-label="汽车智能体实验室首页"><span class="brand-icon">a<span>↗</span></span><span>智能体实验室<small>AGENT LAB / 01</small></span></a><div class="header-right"><button class="icon-btn" id="help" aria-label="模型署名">©</button><button class="icon-btn" id="fullscreen" aria-label="进入全屏">⛶</button></div></header>
 <main>
-  <section class="intro"><div><p class="eyebrow">从一辆车，认识一个智能体</p><h1>拆开，看看它怎么工作<span>。</span></h1></div><p class="intro-note">发动机负责思考，工具负责行动。<br>给它合适的上下文，让任务向前走。</p></section>
+  <section class="intro"><div><p class="eyebrow">从一辆车，认识一个智能体</p><h1>拆开，看看它怎么工作<span>。</span></h1></div></section>
   <div class="workspace">
     <section class="stage" aria-label="可交互的三维汽车">
       <div class="stage-top"><span class="model-tag"><i></i> AGENT / 概念车</span><button id="reset" class="plain-btn">↺ 重置视角</button></div>
@@ -28,7 +28,7 @@
         <div id="context-options" hidden><span class="control-label">选择加入的上下文</span><div class="context-choice"><button data-context="brief">简略</button><button data-context="relevant" class="active">相关且充分</button><button data-context="noisy">夹杂无关内容</button></div><p class="context-preview" id="context-preview"></p></div>
         <button id="detach" class="detach-btn">拆下发动机 <span>↗</span></button><p class="part-state" id="part-state">已装配 · 可以参与任务</p>
       </div>
-      <div class="analogy-tip"><span>i</span><p>这是帮助理解的类比。<button id="learn-more">查看对应关系的边界 ↗</button></p></div>
+      
     </aside>
   </div>
   <section class="drive-panel" aria-labelledby="drive-title">
@@ -36,8 +36,8 @@
     <div class="steps" aria-label="任务执行步骤"><button data-step="0"><span>01</span>明确目标</button><span class="step-link">→</span><button data-step="1"><span>02</span>模型规划</button><span class="step-link">→</span><button data-step="2"><span>03</span>调用工具</button><span class="step-link">→</span><button data-step="3"><span>04</span>读取反馈</button><span class="step-link">→</span><button data-step="4"><span>05</span>整理结果</button></div>
     <div class="demo-output"><div><span class="output-label" id="output-label">准备出发</span><p id="output-text" aria-live="polite">试着拆下一个部件，再启动演示，看看会发生什么。</p></div><div class="demo-controls"><button id="pause" disabled aria-label="暂停演示">暂停</button><button id="next" disabled aria-label="下一步">下一步 →</button></div></div>
   </section>
-  <footer><span>整车 = 智能体系统</span><span>教学模拟 · 不连接真实模型或工具</span><button id="reset-all">恢复初始状态 ↺</button></footer>
+  <footer><span>整车 = 智能体系统</span><button id="reset-all">恢复初始状态 ↺</button></footer>
 </main>
-<dialog id="about"><button class="dialog-close" aria-label="关闭说明">×</button><p class="eyebrow">类比说明</p><h2>用汽车理解，但不止于汽车。</h2><dl><dt>发动机 = 大模型</dt><dd>大模型理解输入、提出计划，并根据任务决定是否使用工具。它的输出仍需要核对。</dd><dt>零部件 = 工具</dt><dd>这里用轮组代表检索、读取资料、计算、生成文件等行动能力；这不是汽车工程中的逐件对应。</dd><dt>汽油 = 上下文</dt><dd>上下文是本次任务可用的信息，如目标、约束、资料和工具返回结果。它并非算力或费用，也不是越多越好；训练得到的知识不等于本次上下文。</dd><dt>演示 = 一种可能的执行过程</dt><dd>真实智能体会依据反馈调整、重复步骤，必要时请人确认。此处按固定路径演示概念，没有真实调用模型。</dd></dl><a href="https://www.anthropic.com/research/building-effective-agents" target="_blank" rel="noopener noreferrer">概念参考：Anthropic · Building effective agents ↗</a></dialog>
+<dialog id="about"><button class="dialog-close" aria-label="关闭署名">×</button><h2>模型署名</h2><p>Car Concept · Eric Chadwick</p><p>Darmstadt Graphics Group GmbH, 2024</p><a href="https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CarConcept" target="_blank" rel="noopener noreferrer">模型来源 ↗</a><a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0 ↗</a><p class="credits-detail">本页调整了显示比例、材质与部件拆解动画，并添加油箱展示组件。</p></dialog>
 <script type="module" src="./app.js"></script>
 </body></html>

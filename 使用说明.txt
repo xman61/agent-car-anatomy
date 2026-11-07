@@ -1,4 +1,4 @@
-拆开一辆智能体 — 第一版互动网页
+拆开一辆智能体 — 写实汽车模型版
 
 在线入口：https://agent-car-lab-61.snowy-llama-6079.chatgpt.site
 网站默认私有，使用发布账号登录。在线发布状态另见交付回复。
@@ -6,7 +6,7 @@
 核心对应：发动机=大模型；零部件=工具；汽油=上下文。
 操作：拖动旋转、滚轮/双指缩放；点击部件或标签查看解释；切换整车/拆解；滑杆调节展开程度。
 点击“拆下”后启动演示，观察缺少大模型或工具时的区别。汽油卡可切换简略、相关且充分、夹杂无关内容三种上下文。
-任务演示支持暂停、继续、下一步和点击步骤跳转。顶部问号解释类比边界。
+任务演示支持暂停、继续、下一步和点击步骤跳转。顶部©按钮查看模型署名。
 
 本地运行（需要Node.js）：
 在本目录运行 node serve.cjs，然后打开 http://127.0.0.1:4173 。
@@ -15,7 +15,8 @@
 
 内容与使用范围：
 这是按固定路径播放的教学模拟，没有真实连接模型、搜索或文件生成服务。
-汽车为代码构建的教学示意模型，不是具体品牌车型或真实机械结构图。
+汽车使用Khronos glTF Sample Assets的Car Concept写实概念车模型，包含原生发动机、车轮、车门、引擎盖、车顶和后部面板；油箱为额外添加的教学展示组件。不是具体量产车型的维修结构图。
+模型与纹理作者为Eric Chadwick / Darmstadt Graphics Group GmbH（2024），按CC BY 4.0使用。完整来源、许可和改动记录见dist/models/ATTRIBUTION.txt。页面主界面已移除制作注释，署名保留在©弹窗。
 上下文是本次可用信息，不是算力、费用，也不等于模型训练所得知识。
 上下文并非越多越好；模型与工具结果仍须核验。
 概念参考：https://www.anthropic.com/research/building-effective-agents
@@ -23,7 +24,9 @@
 文件：
 dist/index.html 页面结构
 dist/style.css 响应式界面
-dist/app.js 三维汽车和交互逻辑
+dist/app.js 教学交互逻辑
+dist/car-scene.js 写实汽车加载与拆解逻辑
+dist/models/car-concept.glb 原始汽车模型
 dist/three.module.js、OrbitControls.js Three.js 0.169.0，许可证见THREE-LICENSE.txt
 working/ 本地检查与截图，不上传网站
 

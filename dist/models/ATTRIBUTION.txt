@@ -1,0 +1,17 @@
+Car Concept
+Model and textures: Eric Chadwick, Darmstadt Graphics Group GmbH, 2024.
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+Source and legal notice:
+https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CarConcept
+Downloaded GLB:
+https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/glTF-Binary/CarConcept.glb
+
+Source model was created by Unity Fan under CC0, then optimized and textured by the above author.
+Khronos logo: © 2015 Khronos Group.
+3D Commerce logo: © 2017 Khronos Group.
+Trademark information: https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/LICENSES/LicenseRef-LegalMark-Khronos.txt
+
+Changes in this application: normalized scale and orientation; adjusted paint and lighting; regrouped native engine, doors, wheels, hood, roof and rear panel for exploded presentation. Added a schematic tank/fuel component to illustrate context. Original model remains unmodified in car-concept.glb.
+
+The model is a realistic concept car, not an exact production make or service manual.
