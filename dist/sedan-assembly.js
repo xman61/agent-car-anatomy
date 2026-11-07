@@ -5,9 +5,18 @@ export function assembleSedan(scene,sedan,engineAsset){
  const moving=[],wheels=[];
  const paint=new THREE.MeshPhysicalMaterial({color:0x637d89,metalness:.72,roughness:.27,clearcoat:1,clearcoatRoughness:.16});
  root.traverse(n=>{if(!n.isMesh)return;n.castShadow=n.receiveShadow=true;const name=n.material.name;
+  // Ramses light-effect meshes are shader overlays, not physical lamp surfaces.
+  if(/LightEffect/.test(name)){n.visible=false;n.castShadow=n.receiveShadow=false;return;}
   if(name==='M_E_common_Paint')n.material=paint;
   else{n.material=n.material.clone();const m=n.material;m.envMapIntensity=1;
-   if(/Glass|Lens/.test(name)){m.transparent=true;m.opacity=/red/.test(name)?.85:.42;m.color.set(/red/.test(name)?0x9c1726:0x263e48);m.depthWrite=false;m.roughness=.16;}
+   if(/Headlights|Taillights/.test(n.name)){
+    const lens=/Lens|lens/.test(n.name),red=/red/.test(n.name),dark=/body|plastic_black_glossy/.test(n.name);
+    m.transparent=lens;m.opacity=lens?(red?.48:.18):1;m.depthWrite=!lens;
+    m.color.set(red?0xa9101e:dark?0x11191d:/opaque_lightgray/.test(n.name)?0xd9dedc:/glass_gray/.test(n.name)?0x4c5356:/glass_glossy/.test(n.name)?0x81969c:/chrome|alu_glossy/.test(n.name)?0xc4cdcf:0x171d20);
+    m.metalness=/chrome|alu_glossy/.test(n.name)?.9:.15;m.roughness=lens?.09:.24;
+    n.castShadow=!lens;n.receiveShadow=!lens;
+   }
+   else if(/Glass|Lens/.test(name)){m.transparent=true;m.opacity=/red/.test(name)?.85:.42;m.color.set(/red/.test(name)?0x9c1726:0x263e48);m.depthWrite=false;m.roughness=.16;}
    else if(/Tire/.test(name)){m.color.set(0x171c1d);m.roughness=.85;}
    else if(/Chrome|Aluminum|Rim|Brake/.test(name)){m.color.set(/black/.test(name)?0x252a2d:0xbac5c9);m.metalness=.85;m.roughness=.28;}
    else if(/M_I_/.test(name)){m.color.set(0x4f4540);m.roughness=.8;}
@@ -16,6 +25,9 @@ export function assembleSedan(scene,sedan,engineAsset){
   }
  });
  function group(nodes,id,key,name,delta){const box=new THREE.Box3();nodes.forEach(n=>box.union(new THREE.Box3().setFromObject(n)));const p=box.getCenter(new THREE.Vector3()),g=new THREE.Group();g.name=key;g.position.copy(p);car.add(g);nodes.forEach(n=>g.attach(n));g.userData={part:id,partName:name};g.traverse(o=>{if(o.isMesh){o.userData.part=id;o.userData.focusKey=key;}});moving.push({g,id,base:p.clone(),delta:new THREE.Vector3(...delta)});return g;}
+ // Inner rear lamps are mounted on the tailgate; retain their world transform.
+ const tailgate=root.getObjectByName('tailgate'),innerLamps=root.getObjectByName('Pivot_Taillights');
+ if(tailgate&&innerLamps){root.updateMatrixWorld(true);tailgate.attach(innerLamps);}
  const body=[],cabin=[];
  for(const node of [...root.children]){const key=node.name;
   if(key.startsWith('wheel')){const p=new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3());wheels.push(group([node],'tools',key,'车轮',[Math.sign(p.x)*.65,-.05,Math.sign(p.z)*2.7]));}
