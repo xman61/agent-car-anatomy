@@ -1,4 +1,5 @@
 import { createCarScene } from './car-scene.js';
+import { brands } from './brand-models.js';
 import { components, componentFor, defaultKey } from './components.js';
 
 const $ = s => document.querySelector(s);
@@ -96,6 +97,11 @@ $('#run').onclick = () => showStep(0, true);
 $('#pause').onclick = () => { if (state.playing) stopDemo(); else showStep(state.step, true); };
 $('#next').onclick = () => showStep(Math.min(4, state.step + 1), false);
 $$('[data-step]').forEach(b => b.onclick = () => showStep(+b.dataset.step, false));
+$$('.brand-switcher [data-brand]').forEach(button=>button.onclick=()=>{
+  if(!graphics)return;stopDemo();graphics.switchBrand(button.dataset.brand);
+  $$('.brand-switcher [data-brand]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+  const brand=brands.find(b=>b.id===button.dataset.brand);$('#brand-status').textContent='已切换到'+brand.name+'，'+brand.kind;
+});
 $('#reset').onclick = () => graphics?.reset();
 $$('.nav-part[data-part]').forEach(b=>b.onclick=()=>{selectPart(b.dataset.part,true,b.dataset.focusKey);});
 $('#overview').onclick=()=>{graphics?.exitFocus();graphics?.reset();};
@@ -118,4 +124,4 @@ if (!document.fullscreenEnabled) $('#fullscreen').hidden = true;
 document.addEventListener('fullscreenchange', () => $('#fullscreen').setAttribute('aria-label', document.fullscreenElement ? '退出全屏' : '进入全屏'));
 selectPart('engine', false); renderSteps();
 
-createCarScene({state,selectPart,setSpread,reduced}).then(g=>{graphics=g;}).catch(error=>{console.error(error);$('#loading').hidden=true;$('#fallback').hidden=false;$('#labels').hidden=true;});
+createCarScene({state,selectPart,setSpread,reduced}).then(g=>{graphics=g;$$('.brand-switcher [data-brand]').forEach(b=>b.disabled=false);}).catch(error=>{console.error(error);$('#loading').hidden=true;$('#fallback').hidden=false;$('#labels').hidden=true;});

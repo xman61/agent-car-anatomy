@@ -5,6 +5,7 @@ import { RoomEnvironment } from './environments/RoomEnvironment.js';
 import { assembleSedan } from './sedan-assembly.js';
 import { createSelectionOutline } from './selection-outline.js';
 import { componentFor } from './components.js';
+import { brands, createAnimatedSUV } from './brand-models.js';
 
 export async function createCarScene({state,selectPart,setSpread,reduced}) {
   const viewport=document.querySelector('#viewport'), $=s=>document.querySelector(s);
@@ -33,7 +34,8 @@ export async function createCarScene({state,selectPart,setSpread,reduced}) {
   renderer.render(scene,camera);
   const loader=new GLTFLoader();
   const [sedan,engineAsset]=await Promise.all([loader.loadAsync('./models/bmw-x5.gltf'),loader.loadAsync('./models/engine.glb')]);
-  const {car,moving,wheels,engine}=assembleSedan(scene,sedan,engineAsset);
+  const bmw=assembleSedan(scene,sedan,engineAsset);
+  function prepare({car,moving,wheels,engine}){
   const fuel=new THREE.Group();fuel.name='context';fuel.userData.partName='油箱与汽油';fuel.position.set(1.68,.65,0);car.add(fuel);
   moving.push({g:fuel,id:'context',base:fuel.position.clone(),delta:new THREE.Vector3(3.35,.65,-.7)});
   const metal=new THREE.MeshStandardMaterial({color:0x737d78,metalness:.82,roughness:.32});
@@ -45,6 +47,11 @@ export async function createCarScene({state,selectPart,setSpread,reduced}) {
   const cap=new THREE.Mesh(new THREE.CylinderGeometry(.11,.11,.12,24),metal);cap.position.y=.4;cap.userData.part='context';cap.userData.focusKey='context';fuel.add(cap);
   const frontWheel=wheels.find(w=>w.position.x<0&&w.position.z>0)||wheels[0];
   const labels=[['engine',engine,new THREE.Vector3(0,0,0)],['tools',frontWheel,new THREE.Vector3(0,0,0)],['context',fuel,new THREE.Vector3(0,0,0)]];
+    return{car,moving,wheels,engine,fuel,fluid,amber,labels};
+  }
+  const fleet=new Map([['bmw',prepare(bmw)],...brands.filter(b=>b.id!=='bmw').map(b=>[b.id,prepare(createAnimatedSUV(scene,b,bmw.engine))])]);
+  let {car,moving,wheels,engine,fuel,fluid,amber,labels}=fleet.get('bmw');
+  let currentBrand='bmw',brandAnimation=null;
   const focusRoot=new THREE.Group();scene.add(focusRoot);
   const selectionColors={engine:0xb7e83f,tools:0x37d5ee,context:0xffbc36};
   const selectionOutline=createSelectionOutline(renderer);
@@ -73,25 +80,37 @@ export async function createCarScene({state,selectPart,setSpread,reduced}) {
     delete viewport.dataset.focus;delete viewport.dataset.focusKey;$('#back-to-car').hidden=true;$('#focus-name').hidden=true;$('.stage').classList.remove('is-focused');
     document.querySelectorAll('.nav-part').forEach(b=>{const active=b.id==='overview';b.classList.toggle('active',active);b.setAttribute('aria-pressed',active);});
   }
+  function switchBrand(id){
+    if(id===currentBrand||!fleet.has(id))return;
+    exitFocus();car.visible=false;car.scale.setScalar(1);car.rotation.y=0;car.position.y=0;
+    ({car,moving,wheels,engine,fuel,fluid,amber,labels}=fleet.get(id));
+    currentBrand=id;car.visible=true;highlightedGroup=null;
+    for(const o of moving){const detached=o.id==='tools'?o.g.name.startsWith('wheel')&&!state.tools:!state[o.id];o.g.position.copy(o.base).addScaledVector(o.delta,detached?Math.max(state.spread,1.15):state.spread);if(detached)o.g.position.y+=.35;}
+    brandAnimation=reduced?null:performance.now();
+    viewport.dataset.brand=id;viewport.dataset.model=id==='bmw'?'bmw-x5':id+'-animated';
+    const brand=brands.find(b=>b.id===id);$('.model-tag').lastChild.textContent=' '+brand.model+' / '+brand.kind;
+    $('.parts-nav-heading>span').textContent=brand.name;
+  }
   let priorAspect=camera.aspect;
   const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();let start,last=0;
   renderer.domElement.addEventListener('pointerdown',e=>start=[e.clientX,e.clientY]);
   renderer.domElement.addEventListener('pointerup',e=>{if(!start||Math.hypot(e.clientX-start[0],e.clientY-start[1])>7)return;const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);raycaster.setFromCamera(pointer,camera);if(focused)return;const hit=raycaster.intersectObjects(car.children,true).find(h=>h.object.userData.part&&h.object.visible);if(hit){const id=hit.object.userData.part;selectPart(id,true,hit.object.userData.focusKey);}});
   renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();$('#fallback').hidden=false;$('#labels').hidden=true;});
-  $('#loading').hidden=true;viewport.dataset.model='bmw-x5';
+  $('#loading').hidden=true;viewport.dataset.model='bmw-x5';viewport.dataset.brand='bmw';
   const tmp=new THREE.Vector3(),fuelColor=new THREE.Color();
   function frame(t){requestAnimationFrame(frame);if(document.hidden)return;const dt=Math.min((t-last)/1000,.05);last=t;const a=reduced?1:1-Math.exp(-7*dt);
+    if(brandAnimation!==null){const progress=Math.min((t-brandAnimation)/650,1),ease=1-Math.pow(1-progress,3);car.scale.setScalar(.9+.1*ease);car.rotation.y=-.28*(1-ease);car.position.y=.25*(1-ease);if(progress===1)brandAnimation=null;}
     if(highlightedGroup?.name!==state.selectedKey)highlightPart(state.selected,moving.find(o=>o.g.name===state.selectedKey)?.g||labels.find(o=>o[0]===state.selected)[1]);
     for(const o of moving){const detached=o.id==='tools'?o.g.name.startsWith('wheel')&&!state.tools:!state[o.id],amount=detached?Math.max(state.spread,1.15):state.spread;tmp.copy(o.base).addScaledVector(o.delta,amount);if(detached)tmp.y+=.35;o.g.position.lerp(tmp,a);}
     fuel.visible=state.spread>.08||!state.context;
     fluid.scale.y=THREE.MathUtils.lerp(fluid.scale.y,!state.context?.02:state.contextMode==='brief'?.3:1,a);fluid.position.y=-.26+.24*fluid.scale.y;
     amber.color.lerp(fuelColor.set(state.contextMode==='noisy'?0x8b8758:0xf2a33f),a);
-    if(!focused){camera.zoom=THREE.MathUtils.lerp(camera.zoom,(1.75-state.spread*.9)*(viewport.clientWidth<500?.85+.05*state.spread:1),a);controls.target.y=THREE.MathUtils.lerp(controls.target.y,1+state.spread*.85,a);controls.target.x=THREE.MathUtils.lerp(controls.target.x,-.55*state.spread,a);camera.updateProjectionMatrix();}else if(camera.aspect!==priorAspect)fitFocus();priorAspect=camera.aspect;controls.update();
+    if(!focused){camera.zoom=THREE.MathUtils.lerp(camera.zoom,(1.75-state.spread*.9)*(currentBrand==='bmw'?1:.86)*(viewport.clientWidth<500?.85+.05*state.spread:1),a);controls.target.y=THREE.MathUtils.lerp(controls.target.y,1+state.spread*.85,a);controls.target.x=THREE.MathUtils.lerp(controls.target.x,-.55*state.spread,a);camera.updateProjectionMatrix();}else if(camera.aspect!==priorAspect)fitFocus();priorAspect=camera.aspect;controls.update();
     const stageRect=viewport.parentElement.getBoundingClientRect(),vr=viewport.getBoundingClientRect();
     for(const [id,g,offset] of labels){const anchor=id==='tools'&&state.selected==='tools'?highlightedGroup:g;const p=anchor.localToWorld(offset.clone()).project(camera),el=$(`.part-label.${id}`),lr=el.getBoundingClientRect();const x=(p.x*.5+.5)*vr.width+vr.left-stageRect.left,y=(-p.y*.5+.5)*vr.height+vr.top-stageRect.top,tx=lr.left+lr.width/2-stageRect.left,ty=lr.top-stageRect.top;
       const path=$(`#leader-${id}`),dot=$(`#dot-${id}`);path.setAttribute('d',`M ${tx} ${ty} L ${tx} ${ty-12} L ${x} ${y}`);dot.setAttribute('cx',x);dot.setAttribute('cy',y);path.style.opacity=dot.style.opacity=!focused&&p.z<1?'1':'0';}
     renderer.render(scene,camera);
     selectionOutline.render(focused?focusRoot.children[0]:highlightedGroup,camera,selectionColors[state.selected]);
   }requestAnimationFrame(frame);
-  return{controls,reset,focus,exitFocus,get focusedId(){return focused?.id;},get focusedKey(){return focused?.key;}};
+  return{controls,reset,focus,exitFocus,switchBrand,get focusedId(){return focused?.id;},get focusedKey(){return focused?.key;}};
 }

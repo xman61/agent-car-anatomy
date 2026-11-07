@@ -22,3 +22,6 @@ Trademark information: https://github.com/KhronosGroup/glTF-Sample-Assets/blob/m
 
 Changes in this application: extracted the Engine node with its referenced geometry, textures and materials into engine.glb; normalized orientation and display size. The complete concept-car body is not included in this version. Added chassis and tank/fuel components for the teaching visualization.
 
+
+Mercedes-Benz / Mazda animation variants
+Original procedural teaching geometry implemented in ../brand-models.js. These simplified animation vehicles are not scanned assets or accurate replicas of any production model. They share the separately attributed engine component above. Brand names and geometric identification motifs remain the property of their respective owners. No third-party Mercedes-Benz or Mazda mesh is bundled.
