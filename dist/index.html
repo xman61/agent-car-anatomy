@@ -14,8 +14,10 @@
   <section class="intro"><div><p class="eyebrow">从一辆车，认识一个智能体</p><h1>拆开，看看它怎么工作<span>。</span></h1></div></section>
   <div class="workspace">
     <section class="stage" aria-label="可交互的三维汽车">
-      <div class="stage-top"><span class="model-tag"><i></i> AGENT / 概念车</span><button id="reset" class="plain-btn">↺ 重置视角</button></div>
-      <div id="viewport"><div id="loading">正在组装你的智能体…</div><div id="fallback" hidden><strong>当前浏览器无法显示 3D</strong><p>仍可使用右侧部件卡片与下方任务演示。</p></div><div id="labels"><button class="part-label engine" data-select="engine"><i></i>发动机 <b>大模型</b></button><button class="part-label tools" data-select="tools"><i></i>零部件 <b>工具</b></button><button class="part-label context" data-select="context"><i></i>汽油 <b>上下文</b></button></div></div>
+      <div class="stage-top"><span class="model-tag"><i></i> AGENT / 四门轿车</span><button id="reset" class="plain-btn">↺ 重置视角</button></div>
+      <div id="viewport"><div id="loading">正在组装你的智能体…</div><div id="fallback" hidden><strong>当前浏览器无法显示 3D</strong><p>仍可使用右侧部件卡片与下方任务演示。</p></div></div>
+      <div id="labels"><button class="part-label engine" data-select="engine"><i></i>发动机 <b>大模型</b></button><button class="part-label tools" data-select="tools"><i></i>零部件 <b>工具</b></button><button class="part-label context" data-select="context"><i></i>汽油 <b>上下文</b></button></div>
+      <svg class="leader-lines" aria-hidden="true"><path id="leader-engine"/><circle id="dot-engine" r="3"/><path id="leader-tools"/><circle id="dot-tools" r="3"/><path id="leader-context"/><circle id="dot-context" r="3"/></svg>
       <div class="stage-bottom"><span class="gesture">拖动旋转 · 双指 / 滚轮缩放</span><div class="view-controls"><button id="assemble" class="view-btn active" aria-pressed="true">整车</button><button id="explode" class="view-btn" aria-pressed="false">拆解</button></div><button id="auto-rotate" class="rotate-btn" aria-label="自动旋转" aria-pressed="false">⟳</button></div>
       <div class="explode-control"><label for="spread">拆解程度</label><input id="spread" type="range" min="0" max="100" value="0"><output id="spread-value">0%</output></div>
     </section>
@@ -38,6 +40,6 @@
   </section>
   <footer><span>整车 = 智能体系统</span><button id="reset-all">恢复初始状态 ↺</button></footer>
 </main>
-<dialog id="about"><button class="dialog-close" aria-label="关闭署名">×</button><h2>模型署名</h2><p>Car Concept · Eric Chadwick</p><p>Darmstadt Graphics Group GmbH, 2024</p><a href="https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CarConcept" target="_blank" rel="noopener noreferrer">模型来源 ↗</a><a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0 ↗</a><p class="credits-detail">本页调整了显示比例、材质与部件拆解动画，并添加油箱展示组件。</p></dialog>
+<dialog id="about"><button class="dialog-close" aria-label="关闭署名">×</button><h2>模型署名</h2><p>四门轿车 · Innerscene · CC0</p><a href="https://www.innerscene.com/tools/library/3d-parts/graphite-four-door-sedan-eed96d12" target="_blank" rel="noopener noreferrer">轿车模型来源 ↗</a><p>发动机 · Eric Chadwick / Darmstadt Graphics Group GmbH, 2024</p><a href="https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CarConcept" target="_blank" rel="noopener noreferrer">发动机模型来源 ↗</a><a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0 ↗</a><p class="credits-detail">已调整材质、显示比例和分组，添加底盘与油箱展示组件。</p></dialog>
 <script type="module" src="./app.js"></script>
 </body></html>
