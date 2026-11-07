@@ -1,14 +1,11 @@
 import { createCarScene } from './car-scene.js';
+import { components, componentFor, defaultKey } from './components.js';
 
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state = { selected: 'engine', spread: 0, engine: true, tools: true, context: true, contextMode: 'relevant', step: -1, playing: false };
-const parts = {
-  engine: { title: '大模型', name: '发动机', symbol: '⚙', mapping: '发动机 → 思考与规划', color: '#40695d', description: '理解任务、提出计划，并决定下一步如何行动。像发动机一样提供核心能力，输出仍需要核对。', example: '理解“设计一节认识汽车的活动”，先安排观察、配对和回顾三个环节。' },
-  tools: { title: '工具', name: '工具零部件', symbol: '⌘', mapping: '零部件 → 具体行动', color: '#587c99', description: '检索、读取资料、计算、生成文件，让想法变成行动。模型按任务选择工具，也要核验工具返回的结果。', example: '检索汽车素材、读取活动模板，再生成一份可使用的活动单。' },
-  context: { title: '上下文', name: '汽油', symbol: '◕', mapping: '汽油 → 本次可用的信息', color: '#cf7446', description: '目标、学情、要求、参考资料和工具反馈，都是本次任务可用的信息。相关、充分，比单纯堆积更有用。', example: '“5—6 岁儿童，20 分钟，认识轮胎和车门；教室里有玩具汽车。”' }
-};
+const state = { selected: 'engine', selectedKey: 'engine', lastToolKey: 'wheel_0', spread: 0, engine: true, tools: true, context: true, contextMode: 'relevant', step: -1, playing: false };
+const categoryColors={engine:'#40695d',tools:'#587c99',context:'#cf7446'};
 const contexts = {
   brief: '只给一句：“做一个汽车活动。”',
   relevant: '5—6 岁 · 20 分钟 · 认识轮胎和车门 · 有玩具汽车',
@@ -21,23 +18,31 @@ function stopDemo(message) {
   if (message) { state.step = -1; $('#output-label').textContent = '配置已改变'; $('#output-text').textContent = message; }
   renderSteps();
 }
-function selectPart(id, open = true) {
-  state.selected = id; const p = parts[id];
-  document.documentElement.dataset.selection = id;
-  document.documentElement.style.setProperty('--accent', p.color);
-  $('#part-title').textContent = p.title; $('#mapping').textContent = p.mapping;
-  $('#part-symbol').textContent = p.symbol; $('#part-description').textContent = p.description;
-  $('#part-example').textContent = p.example;
-  $('#part-index').textContent = `0${Object.keys(parts).indexOf(id) + 1} / 03`;
-  $$('.part-tabs button').forEach(b => { const active = b.dataset.select === id; b.setAttribute('aria-selected', active); b.tabIndex = active ? 0 : -1; });
-  $('#detail').setAttribute('aria-labelledby', 'part-title');
-  $$('.part-label').forEach(b => b.classList.toggle('selected', b.dataset.select === id));
-  $('#context-options').hidden = id !== 'context';
-  $('#detach').innerHTML = `${state[id] ? (id === 'context' ? '移除汽油' : '拆下' + p.name) : (id === 'context' ? '补充汽油' : '装回' + p.name)} <span>${state[id] ? '↗' : '↙'}</span>`;
-  $('#part-state').textContent = state[id] ? '已装配 · 可以参与任务' : '已移除 · 启动演示看看变化';
-  $('#context-preview').textContent = contexts[state.contextMode];
-  if (open) graphics?.focus(id);
-  else if(graphics?.focusedId && graphics.focusedId !== id) graphics.exitFocus();
+function selectPart(id, open = true, key = defaultKey(id)) {
+  const p=componentFor(key,id);id=p.category;
+  if(open&&state.playing)stopDemo();
+  state.selected=id;state.selectedKey=key;
+  if(id==='tools')state.lastToolKey=key;
+  document.documentElement.dataset.selection=id;
+  document.documentElement.style.setProperty('--accent',categoryColors[id]);
+  $('#part-title').textContent=p.title;$('#mapping').textContent=p.name+' → '+p.title;
+  $('#part-symbol').textContent=p.symbol;$('#part-description').textContent=p.description;
+  $('#part-example').textContent=p.example;
+  $('#part-actions').replaceChildren(...p.actions.map(text=>{const li=document.createElement('li');li.textContent=text;return li;}));
+  $('#part-index').textContent=String(components.indexOf(p)+1).padStart(2,'0')+' / '+components.length;
+  $('#detail').dataset.component=p.id;$('#detail').setAttribute('aria-labelledby','part-title');
+  document.querySelectorAll('.part-tabs button').forEach(b=>{const active=b.dataset.select===id;b.setAttribute('aria-selected',active);b.tabIndex=active?0:-1;});
+  document.querySelectorAll('.part-label').forEach(b=>b.classList.toggle('selected',b.dataset.select===id));
+  if(id==='tools'){$('#tool-label-name').textContent=p.name;$('#tool-label-role').textContent=p.title;}
+  $('#context-options').hidden=id!=='context';
+  const removable=['engine','wheel','context'].includes(p.id);
+  $('#detach').hidden=$('#part-state').hidden=!removable;
+  $('#detach').innerHTML=(state[id]?(id==='context'?'移除汽油':'拆下'+p.name):(id==='context'?'补充汽油':'装回'+p.name))+' <span>'+(state[id]?'↗':'↙')+'</span>';
+  $('#part-state').textContent=state[id]?'已装配 · 可以参与任务':'已移除 · 启动演示看看变化';
+  $('#context-preview').textContent=contexts[state.contextMode];
+  $('.inspector').scrollTop=0;
+  if(open)graphics?.focus(id,key);
+  else if(graphics?.focusedId&&(graphics.focusedId!==id||graphics.focusedKey!==key))graphics.exitFocus();
 }
 function setSpread(value) {
   graphics?.exitFocus();
@@ -76,7 +81,7 @@ function showStep(index, autoplay = false) {
   $('#output-text').textContent = text; selectPart(part, false); renderSteps();
   if (state.playing) demoTimer = setTimeout(() => showStep(index + 1, true), 5500);
 }
-$$('[data-select]').forEach(b => b.addEventListener('click', () => selectPart(b.dataset.select)));
+$$('[data-select]').forEach(b => b.addEventListener('click', () => selectPart(b.dataset.select,true,b.dataset.select==='tools'?state.lastToolKey:defaultKey(b.dataset.select))));
 $('.part-tabs').addEventListener('keydown', e => {
   const tabs = $$('.part-tabs button'); let index = tabs.indexOf(document.activeElement);
   if (!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
@@ -85,20 +90,22 @@ $('.part-tabs').addEventListener('keydown', e => {
 });
 $('#spread').addEventListener('input', e => setSpread(+e.target.value / 100));
 $('#assemble').onclick = () => setSpread(0); $('#explode').onclick = () => setSpread(1);
-$('#detach').onclick = () => { const id = state.selected; state[id] = !state[id]; stopDemo('部件配置已更新。重新启动，观察任务如何变化。'); selectPart(id); };
+$('#detach').onclick = () => { const id = state.selected; state[id] = !state[id]; stopDemo('部件配置已更新。重新启动，观察任务如何变化。'); selectPart(id,true,state.selectedKey); };
 $$('[data-context]').forEach(b => b.onclick = () => { state.contextMode = b.dataset.context; state.context = true; $$('[data-context]').forEach(x => x.classList.toggle('active', x === b)); stopDemo('上下文已更新。重新启动，比较任务处理过程。'); selectPart('context'); });
 $('#run').onclick = () => showStep(0, true);
 $('#pause').onclick = () => { if (state.playing) stopDemo(); else showStep(state.step, true); };
 $('#next').onclick = () => showStep(Math.min(4, state.step + 1), false);
 $$('[data-step]').forEach(b => b.onclick = () => showStep(+b.dataset.step, false));
 $('#reset').onclick = () => graphics?.reset();
-$$('.nav-part[data-part]').forEach(b=>b.onclick=()=>{selectPart(b.dataset.part,false);graphics?.focus(b.dataset.part,b.dataset.focusKey);});
+$$('.nav-part[data-part]').forEach(b=>b.onclick=()=>{selectPart(b.dataset.part,true,b.dataset.focusKey);});
 $('#overview').onclick=()=>{graphics?.exitFocus();graphics?.reset();};
 $('#back-to-car').onclick = () => graphics?.exitFocus();
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#about').open)graphics?.exitFocus();});
 $('#auto-rotate').onclick = () => { const on = $('#auto-rotate').getAttribute('aria-pressed') !== 'true'; $('#auto-rotate').setAttribute('aria-pressed', on); if (graphics) graphics.controls.autoRotate = on; };
 $('#reset-all').onclick = () => {
-  stopDemo(); Object.assign(state, { engine: true, tools: true, context: true, contextMode: 'relevant', step: -1 });
+  stopDemo(); Object.assign(state, { engine: true, tools: true, context: true, lastToolKey:'wheel_0', contextMode: 'relevant', step: -1 });
+  const defaultTool=componentFor('wheel_0');$('#tool-label-name').textContent=defaultTool.name;$('#tool-label-role').textContent=defaultTool.title;
+  $('.parts-nav').scrollTop=0;$('.parts-list').scrollLeft=0;
   $$('[data-context]').forEach(x => x.classList.toggle('active', x.dataset.context === 'relevant'));
   setSpread(0); selectPart('engine', false); renderSteps(); graphics?.reset();
   $('#auto-rotate').setAttribute('aria-pressed','false'); if(graphics) graphics.controls.autoRotate = false;
