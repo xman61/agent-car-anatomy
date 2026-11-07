@@ -3,6 +3,7 @@ import { OrbitControls } from './OrbitControls.js';
 import { GLTFLoader } from './loaders/GLTFLoader.js';
 import { RoomEnvironment } from './environments/RoomEnvironment.js';
 import { assembleSedan } from './sedan-assembly.js';
+import { createSelectionOutline } from './selection-outline.js';
 
 export async function createCarScene({state,selectPart,setSpread,reduced}) {
   const viewport=document.querySelector('#viewport'), $=s=>document.querySelector(s);
@@ -46,21 +47,10 @@ export async function createCarScene({state,selectPart,setSpread,reduced}) {
   const focusRoot=new THREE.Group();scene.add(focusRoot);
   const names={engine:'大模型',tools:'工具',context:'上下文'};
   const selectionColors={engine:0xb7e83f,tools:0x37d5ee,context:0xffbc36};
-  let highlightedGroup=null,highlightedId=null,savedMaterials=[];
+  const selectionOutline=createSelectionOutline(renderer);
+  let highlightedGroup=null,highlightedId=null;
   function highlightPart(id,g){
-    if(highlightedGroup===g&&highlightedId===id)return;
-    for(const [mesh,original,highlighted] of savedMaterials){mesh.material=original;highlighted.forEach(m=>m.dispose());}
-    savedMaterials=[];highlightedGroup=g;highlightedId=id;
-    g.traverse(mesh=>{if(!mesh.isMesh)return;const original=mesh.material;
-      const materials=(Array.isArray(original)?original:[original]).map(source=>{
-        const m=source.clone();m.color?.set(selectionColors[id]);m.map=null;
-        if(m.emissive){m.emissive.set(selectionColors[id]);m.emissiveMap=null;m.emissiveIntensity=.12;}
-        if('metalness' in m)m.metalness=Math.min(m.metalness,.28);
-        if('roughness' in m)m.roughness=Math.max(m.roughness,.34);
-        if('aoMapIntensity' in m)m.aoMapIntensity=.45;
-        m.needsUpdate=true;return m;
-      });mesh.material=Array.isArray(original)?materials:materials[0];savedMaterials.push([mesh,original,materials]);
-    });
+    highlightedGroup=g;highlightedId=id;
   }
   function fitFocus(){
     const half=THREE.MathUtils.degToRad(camera.fov/2),angle=Math.min(half,Math.atan(Math.tan(half)*camera.aspect));
@@ -101,6 +91,7 @@ export async function createCarScene({state,selectPart,setSpread,reduced}) {
     for(const [id,g,offset] of labels){const p=g.localToWorld(offset.clone()).project(camera),el=$(`.part-label.${id}`),lr=el.getBoundingClientRect();const x=(p.x*.5+.5)*vr.width+vr.left-stageRect.left,y=(-p.y*.5+.5)*vr.height+vr.top-stageRect.top,tx=lr.left+lr.width/2-stageRect.left,ty=lr.top-stageRect.top;
       const path=$(`#leader-${id}`),dot=$(`#dot-${id}`);path.setAttribute('d',`M ${tx} ${ty} L ${tx} ${ty-12} L ${x} ${y}`);dot.setAttribute('cx',x);dot.setAttribute('cy',y);path.style.opacity=dot.style.opacity=!focused&&p.z<1?'1':'0';}
     renderer.render(scene,camera);
+    selectionOutline.render(focused?focusRoot.children[0]:highlightedGroup,camera,selectionColors[state.selected]);
   }requestAnimationFrame(frame);
   return{controls,reset,focus,exitFocus,get focusedId(){return focused?.id;}};
 }
