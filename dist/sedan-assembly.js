@@ -2,6 +2,9 @@ import * as THREE from 'three';
 export function assembleSedan(scene,sedan,engineAsset){
  const car=new THREE.Group();scene.add(car);const root=sedan.scene;car.add(root);root.updateMatrixWorld(true);
  let b=new THREE.Box3().setFromObject(root);root.scale.setScalar(5.9/b.getSize(new THREE.Vector3()).x);root.updateMatrixWorld(true);b.setFromObject(root);const c=b.getCenter(new THREE.Vector3());root.position.set(-c.x,-b.min.y+.04,-c.z);root.updateMatrixWorld(true);
+ // The source hood paint is a half-shell; mirror only its exterior skin.
+ const hoodPaint=root.getObjectByName('001_Hood_paint');
+ if(hoodPaint){const otherHalf=hoodPaint.clone();otherHalf.name='001_Hood_paint_mirrored';otherHalf.scale.z*=-1;hoodPaint.parent.add(otherHalf);}
  const moving=[],wheels=[];
  const paint=new THREE.MeshPhysicalMaterial({color:0x637d89,metalness:.72,roughness:.27,clearcoat:1,clearcoatRoughness:.16});
  root.traverse(n=>{if(!n.isMesh)return;n.castShadow=n.receiveShadow=true;const name=n.material.name;
